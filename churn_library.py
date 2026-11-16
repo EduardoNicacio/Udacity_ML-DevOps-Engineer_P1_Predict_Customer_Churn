@@ -130,14 +130,23 @@ def perform_eda(df):
 
 def encoder_helper(df, category_lst, response):
     """
-    Encode categorical features.
+    Encode categorical features with target (mean-response) encoding.
+
+    For every column in category_lst, a mapping from each category to
+    the mean value of the response is computed on the dataframe passed
+    in, and a new column named "{col}_{response}" is added. Pass only
+    the training data to this function when preparing model features,
+    so the encoding statistics never use rows from the test set.
 
     input:
-            df: pandas dataframe
-            category_lst: list of categorical columns
-            response: response column name
+            df: pandas dataframe containing the category columns and
+                the response column
+            category_lst: list of categorical column names to encode
+            response: name of the binary response column used to
+                compute the per-category mean
     output:
-            df: updated dataframe
+            df: updated dataframe with one "{col}_{response}" column
+                added per entry in category_lst
     """
     for col in category_lst:
         df[f"{col}_{response}"] = df[col].map(
@@ -148,11 +157,18 @@ def encoder_helper(df, category_lst, response):
 
 def perform_feature_engineering(df, response):
     """
-    Split dataset into train and test sets.
+    Split dataset into train and test sets, then encode categories.
+
+    The split is performed first, and the target encoding for every
+    categorical column is fitted on the training fold only. Test rows
+    whose category was unseen in training receive the training-fold
+    mean response. This prevents target leakage from the test set
+    into the training features.
 
     input:
-              df: pandas dataframe
-              response: response column name
+              df: pandas dataframe containing the raw category
+                  columns and the response column
+              response: name of the binary response column
     output:
               x_train, x_test, y_train, y_test
     """
@@ -178,12 +194,22 @@ def perform_feature_engineering(df, response):
         "Card_Category_Churn",
     ]
 
-    x_data = df[keep_cols]
-    y_data = df[response]
-
-    x_train, x_test, y_train, y_test = train_test_split(
-        x_data, y_data, test_size=0.3, random_state=42
+    df_train, df_test = train_test_split(
+        df, test_size=0.3, random_state=42
     )
+
+    global_mean = df_train[response].mean()
+    for col in CATEGORY_COLUMNS:
+        mapping = df_train.groupby(col)[response].mean()
+        for split in (df_train, df_test):
+            split[f"{col}_{response}"] = (
+                split[col].map(mapping).fillna(global_mean)
+            )
+
+    x_train = df_train[keep_cols]
+    x_test = df_test[keep_cols]
+    y_train = df_train[response]
+    y_test = df_test[response]
     return x_train, x_test, y_train, y_test
 
 
@@ -221,8 +247,21 @@ def classification_report_image(  # pylint: disable=too-many-arguments
     """
     Save classification reports as images.
 
+    Renders the train and test classification reports of both models
+    into RESULTS_DIR: logistic_results.png (Logistic Regression) and
+    rf_results.png (Random Forest).
+
     input:
-            predictions and labels
+            y_train: true labels of the training set
+            y_test: true labels of the test set
+            y_train_preds_lr: Logistic Regression predictions on the
+                training set
+            y_train_preds_rf: Random Forest predictions on the
+                training set
+            y_test_preds_lr: Logistic Regression predictions on the
+                test set
+            y_test_preds_rf: Random Forest predictions on the test
+                set
     output:
             None
     """
@@ -398,7 +437,6 @@ def main():
 
     perform_eda(df)
 
-    df = encoder_helper(df, CATEGORY_COLUMNS, "Churn")
     x_train, x_test, y_train, y_test = perform_feature_engineering(
         df, "Churn"
     )

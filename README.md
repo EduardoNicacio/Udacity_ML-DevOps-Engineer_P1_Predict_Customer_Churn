@@ -11,9 +11,10 @@
 > campaigns before they leave.
 >
 > The pipeline loads the bank customer dataset, creates a binary churn target
-> from the `Attrition_Flag` column, performs exploratory data analysis, encodes
-> categorical features using their mean churn rate, and splits the data into
-> training (70%) and test (30%) sets.
+> from the `Attrition_Flag` column, performs exploratory data analysis, splits
+> the data into training (70%) and test (30%) sets, and encodes the
+> categorical features using per-category churn rates fitted on the training
+> set only.
 >
 > Two classification models are trained and compared: a **Random Forest**
 > tuned with `GridSearchCV` and a **Logistic Regression**. Their performance is
@@ -115,12 +116,13 @@ python churn_library.py
 
 > Running this script executes the complete pipeline: it loads
 > `data/bank_data.csv`, derives the `Churn` target, generates and saves the
-> five EDA plots, encodes the five categorical features, performs the
-> train/test split (70/30, `random_state=42`), tunes a Random Forest with a
-> 5-fold `GridSearchCV`, trains the Logistic Regression, saves both fitted
-> models with `joblib`, and writes the ROC curve comparison, classification
-> reports and feature importance plots. The grid search trains 120 model
-> combinations, so the run typically takes a few minutes.
+> five EDA plots, performs the train/test split (70/30, `random_state=42`),
+> encodes the five categorical features using statistics fitted on the
+> training fold only, tunes a Random Forest with a 5-fold `GridSearchCV`,
+> trains the Logistic Regression, saves both fitted models with `joblib`, and
+> writes the ROC curve comparison, classification reports and feature
+> importance plots. The grid search trains 120 model combinations, so the run
+> typically takes a few minutes.
 
 ---
 
@@ -131,13 +133,15 @@ python churn_script_logging_and_tests.py
 ```
 
 > The test script re-runs each pipeline stage and asserts the expected
-> side effects: the CSV loads into a non-empty DataFrame, all five EDA images
-> are created, every `<category>_Churn` column is present, the four train/test
-> arrays are non-empty, and both model files and the four result images exist.
-> Each check appends a timestamped `SUCCESS` or `FAILED` message (including the
-> exception text) to `logs/churn_library.log`; any failure is re-raised so the
-> process exits with a non-zero status. The log file is truncated at the start
-> of every run, so it always reflects the most recent execution.
+> side effects: the CSV loads into a non-empty DataFrame, the output
+> directories exist, all five EDA images are created, every
+> `<category>_Churn` column is present, the four train/test arrays are
+> non-empty, the classification report and feature importance images are
+> rendered, and both model files exist. Each check appends a timestamped
+> `SUCCESS` or `FAILED` message (including the exception text) to
+> `logs/churn_library.log`; any failure is re-raised so the process exits
+> with a non-zero status. The log file is truncated at the start of every
+> run, so it always reflects the most recent execution.
 
 ---
 
@@ -186,6 +190,11 @@ python churn_script_logging_and_tests.py
 - **Dataset assumptions**: the CSV must contain `Attrition_Flag` and the 19
   feature columns listed in `perform_feature_engineering`; missing columns
   raise a `KeyError` rather than being silently skipped.
+- **Target encoding without leakage**: the train/test split is performed
+  before categorical encoding. The category-to-mean-churn mappings are fitted
+  on the training fold only, and test rows with unseen categories receive the
+  training-fold mean churn rate. Reported metrics therefore reflect
+  performance on information the models have genuinely never seen.
 - **Environment**: the project targets a Windows machine with an NVIDIA GPU.
   The pipeline itself is CPU-bound (scikit-learn `RandomForestClassifier` and
   `LogisticRegression`), so no CUDA build is required; packages are installed

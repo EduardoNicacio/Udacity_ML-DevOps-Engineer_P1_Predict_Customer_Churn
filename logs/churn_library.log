@@ -1,6 +1,9 @@
-[2026-11-16 11:32:23] root - INFO - test_import: SUCCESS - file found
-[2026-11-16 11:32:23] root - INFO - test_import: SUCCESS - DataFrame shape (10127, 22)
-[2026-11-16 11:32:24] root - INFO - test_eda: SUCCESS - all EDA files created
-[2026-11-16 11:32:24] root - INFO - test_encoder_helper: SUCCESS - encoded columns present
-[2026-11-16 11:32:25] root - INFO - test_perform_feature_engineering: SUCCESS - train=7088 test=3039
-[2026-11-16 11:33:29] root - INFO - test_train_models: SUCCESS - all outputs found
+[2026-11-16 14:03:22] root - INFO - test_import: SUCCESS - file found
+[2026-11-16 14:03:22] root - INFO - test_import: SUCCESS - DataFrame shape (10127, 22)
+[2026-11-16 14:03:22] root - INFO - test_create_output_directories: SUCCESS - all directories exist
+[2026-11-16 14:03:23] root - INFO - test_eda: SUCCESS - all EDA files created
+[2026-11-16 14:03:23] root - INFO - test_encoder_helper: SUCCESS - encoded columns present
+[2026-11-16 14:03:23] root - INFO - test_perform_feature_engineering: SUCCESS - train=7088 test=3039
+[2026-11-16 14:03:24] root - INFO - test_classification_report_image: SUCCESS - report images created
+[2026-11-16 14:03:25] root - INFO - test_feature_importance_plot: SUCCESS - importance images created
+[2026-11-16 14:04:28] root - INFO - test_train_models: SUCCESS - all outputs found
