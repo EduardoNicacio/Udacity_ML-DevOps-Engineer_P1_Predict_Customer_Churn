@@ -86,6 +86,25 @@ After running the project, outputs will be saved to:
 
 ---
 
+## Environment Setup
+
+> Before running the pipeline or the tests, create the virtual environment and
+> install the dependencies (Windows, PowerShell):
+
+```bash
+python -m venv venv
+.\venv\Scripts\Activate.ps1
+pip install --upgrade pip
+pip install -r requirements.txt
+```
+
+> The environment used for this submission runs Python 3.14; `shap` is pinned
+> as `shap>=0.54.1` because version 0.50.0 provides no Python 3.14 wheels.
+> The pipeline is CPU-bound (scikit-learn models only), so no CUDA build is
+> required.
+
+---
+
 ## Running the Files
 
 ### 1. Run the Pipeline
