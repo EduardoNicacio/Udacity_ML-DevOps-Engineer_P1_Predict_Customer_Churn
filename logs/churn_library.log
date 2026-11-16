@@ -1,0 +1,6 @@
+[2026-11-16 11:32:23] root - INFO - test_import: SUCCESS - file found
+[2026-11-16 11:32:23] root - INFO - test_import: SUCCESS - DataFrame shape (10127, 22)
+[2026-11-16 11:32:24] root - INFO - test_eda: SUCCESS - all EDA files created
+[2026-11-16 11:32:24] root - INFO - test_encoder_helper: SUCCESS - encoded columns present
+[2026-11-16 11:32:25] root - INFO - test_perform_feature_engineering: SUCCESS - train=7088 test=3039
+[2026-11-16 11:33:29] root - INFO - test_train_models: SUCCESS - all outputs found
