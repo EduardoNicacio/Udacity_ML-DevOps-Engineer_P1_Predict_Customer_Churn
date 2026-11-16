@@ -396,7 +396,8 @@ zsdoc/data
 
 # MichaelAquilina/zsh-autoswitch-virtualenv plugin's files
 # (for Zsh plugins using Python)
-.venv
+.venv/
+venv/
 
 # Zunit tests' output
 /tests/_output/*
